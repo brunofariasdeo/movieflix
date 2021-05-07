@@ -39,4 +39,15 @@ public class UserService {
 		
 		return new UserDTO(entity);
 	}
+
+	@Transactional
+	public UserDTO insert(UserDTO dto) {
+		User entity = new User();
+		entity.setEmail(dto.getEmail());
+		entity.setName(dto.getName());
+		entity.setPassword(dto.getPassword());
+		entity = repository.save(entity);
+		
+		return new UserDTO(entity);
+	}
 }
