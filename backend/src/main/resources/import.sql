@@ -9,3 +9,7 @@ INSERT INTO tb_movie (title, subtitle, year, img_url, synopsis, created_At) VALU
 INSERT INTO tb_genre (name) VALUES ('Ação');
 INSERT INTO tb_genre (name) VALUES ('Aventura');
 INSERT INTO tb_genre (name) VALUES ('Comédia');
+
+INSERT INTO tb_movie_genre (movie_id, genre_id) VALUES (1,1);
+INSERT INTO tb_movie_genre (movie_id, genre_id) VALUES (2,2);
+INSERT INTO tb_movie_genre (movie_id, genre_id) VALUES (3,3);
