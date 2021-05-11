@@ -1,7 +1,5 @@
 package com.devsuperior.movieflix.services;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -9,6 +7,8 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,16 +25,10 @@ public class MovieService {
 	private MovieRepository repository;
 	
 	@Transactional(readOnly = true)
-	public List<MovieDTO> findAll(){
-		List<Movie> list = repository.findAll();
-		
-		List<MovieDTO> listDTO = new ArrayList<>();
-		
-		for(Movie movie : list) {
-			listDTO.add(new MovieDTO(movie));
-		}
-		
-		return listDTO;
+	public Page<MovieDTO> findAllPaged(PageRequest pageRequest){
+		Page<Movie> list = repository.findAll(pageRequest);
+
+		return list.map(x -> new MovieDTO(x));
 	}
 
 	@Transactional(readOnly = true)
@@ -42,7 +36,7 @@ public class MovieService {
 		Optional<Movie> obj = repository.findById(id);
 		Movie entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
 		
-		return new MovieDTO(entity);
+		return new MovieDTO(entity, entity.getGenres());
 	}
 	
 	@Transactional

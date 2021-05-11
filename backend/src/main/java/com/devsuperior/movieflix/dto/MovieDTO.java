@@ -1,7 +1,11 @@
 package com.devsuperior.movieflix.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
+import com.devsuperior.movieflix.entities.Genre;
 import com.devsuperior.movieflix.entities.Movie;
 
 public class MovieDTO implements Serializable {
@@ -13,6 +17,8 @@ public class MovieDTO implements Serializable {
 	private Integer year;
 	private String imgUrl;
 	private String synopsis;
+	
+	private List<GenreDTO> genres = new ArrayList<>();
 	
 	public MovieDTO() {
 		
@@ -34,6 +40,11 @@ public class MovieDTO implements Serializable {
 		this.year = entity.getYear();
 		this.imgUrl = entity.getImgUrl();
 		this.synopsis = entity.getSynopsis();
+	}
+	
+	public MovieDTO(Movie entity, Set<Genre> genres) {
+		this(entity);
+		genres.forEach(genre -> this.genres.add(new GenreDTO(genre)));
 	}
 
 	public Long getId() {
@@ -82,5 +93,13 @@ public class MovieDTO implements Serializable {
 
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
+	}
+
+	public List<GenreDTO> getGenres() {
+		return genres;
+	}
+
+	public void setGenres(List<GenreDTO> genres) {
+		this.genres = genres;
 	}
 }

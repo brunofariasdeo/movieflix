@@ -2,12 +2,17 @@ package com.devsuperior.movieflix.entities;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -20,12 +25,14 @@ public class Movie implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String title;
 	
 	@Column(columnDefinition = "TEXT")
+	private String title;
 	private String subtitle;
 	private Integer year;
 	private String imgUrl;
+	
+	@Column(columnDefinition = "TEXT")
 	private String synopsis;
 	
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
@@ -33,6 +40,13 @@ public class Movie implements Serializable{
 
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
 	private Instant updatedAt;
+	
+	@ManyToOne(targetEntity = Genre.class)
+	@JoinTable(name = "tb_movie_genre",
+		joinColumns = @JoinColumn(name = "movie_id"),
+		inverseJoinColumns = @JoinColumn(name ="genre_id")
+	)
+	Set<Genre> genres = new HashSet<>();
 	
 	public Movie() {
 		
@@ -105,6 +119,10 @@ public class Movie implements Serializable{
 
 	public Instant getUpdatedAt() {
 		return updatedAt;
+	}
+
+	public Set<Genre> getGenres() {
+		return genres;
 	}
 
 	@PrePersist
