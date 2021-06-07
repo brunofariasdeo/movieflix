@@ -1,5 +1,6 @@
 package com.devsuperior.movieflix.services;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -19,7 +20,8 @@ import com.devsuperior.movieflix.exceptions.ResourceNotFoundException;
 import com.devsuperior.movieflix.repositories.GenreRepository;
 
 @Service
-public class GenreService {
+public class GenreService implements Serializable{
+	private static final long serialVersionUID = 1L;
 	
 	@Autowired
 	private GenreRepository repository;

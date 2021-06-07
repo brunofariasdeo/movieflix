@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,7 +14,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name="tb_genre")
 public class Genre implements Serializable {
-
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -24,10 +21,7 @@ public class Genre implements Serializable {
 	private Long id;
 	private String name;
 	
-	@OneToMany(
-			mappedBy = "genre", 
-			fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "genre")
 	private Set<Movie> movies = new HashSet<>();
 	
 	public Genre() {

@@ -1,5 +1,6 @@
 package com.devsuperior.movieflix.services;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -13,24 +14,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.movieflix.dto.MovieDTO;
+import com.devsuperior.movieflix.entities.Genre;
 import com.devsuperior.movieflix.entities.Movie;
 import com.devsuperior.movieflix.exceptions.DatabaseException;
 import com.devsuperior.movieflix.exceptions.ResourceNotFoundException;
+import com.devsuperior.movieflix.repositories.GenreRepository;
 //import com.devsuperior.movieflix.repositories.GenreRepository;
 import com.devsuperior.movieflix.repositories.MovieRepository;
 
 @Service
-public class MovieService {
-	
+public class MovieService implements Serializable{
+	private static final long serialVersionUID = 1L;
+
 	@Autowired
 	private MovieRepository repository;
 	
-//	@Autowired
-//	private GenreRepository GenreRepository;
+	@Autowired
+	private GenreRepository genreRepository;
 	
 	@Transactional(readOnly = true)
-	public Page<MovieDTO> findAllPaged(PageRequest pageRequest){
-		Page<Movie> list = repository.findAll(pageRequest);
+	public Page<MovieDTO> findAllPaged(Long genreId, String title, PageRequest pageRequest){
+		Genre genre = (genreId == 0) ? null : genreRepository.getOne(genreId);
+		Page<Movie> list = repository.find(genre, pageRequest);
 
 		return list.map(x -> new MovieDTO(x));
 	}

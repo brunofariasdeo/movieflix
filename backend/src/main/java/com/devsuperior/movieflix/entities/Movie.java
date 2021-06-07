@@ -1,7 +1,8 @@
 package com.devsuperior.movieflix.entities;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -33,15 +33,12 @@ public class Movie implements Serializable{
 	@Column(columnDefinition = "TEXT")
 	private String synopsis;
 	
-	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-	private Instant createdAt;
-
-	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-	private Instant updatedAt;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "movie_id")
+    @JoinColumn(name = "genre_id")
 	private Genre genre;
+	
+	@OneToMany(mappedBy = "movie")
+	private List<Review> reviews = new ArrayList<>();
 	
 	public Movie() {
 		
@@ -112,29 +109,10 @@ public class Movie implements Serializable{
 	public void setGenre(Genre genre) {
 		this.genre = genre;
 	}
-
-	public void setUpdatedAt(Instant updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
-
-	public Instant getUpdatedAt() {
-		return updatedAt;
-	}
 	
-	@PrePersist
-	public void prePersist() {
-		createdAt = Instant.now();
+	public List<Review> getReviews() {
+		return reviews;
 	}
-
-	@PreUpdate
-	public void preUpdate() {
-		updatedAt = Instant.now();
-	}
-	
 
 	@Override
 	public int hashCode() {
