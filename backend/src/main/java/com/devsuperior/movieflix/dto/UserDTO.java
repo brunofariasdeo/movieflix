@@ -1,6 +1,8 @@
 package com.devsuperior.movieflix.dto;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.devsuperior.movieflix.entities.User;
 
@@ -13,15 +15,27 @@ public class UserDTO implements Serializable{
 	private String email;
 	private String password;
 	
+	Set<RoleDTO> roles = new HashSet<>();
+	
 	public UserDTO() {
 		
 	}
 	
+	public UserDTO(Long id, String name, String email, String password) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+	}
+
 	public UserDTO(User entity) {
 		this.id = entity.getId();
 		this.name = entity.getName();
 		this.email = entity.getEmail();
 		this.password = entity.getPassword();
+		entity.getRoles().forEach(
+			role -> this.roles.add(new RoleDTO(role))
+		);
 	}
 
 	public Long getId() {
@@ -54,5 +68,9 @@ public class UserDTO implements Serializable{
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Set<RoleDTO> getRoles() {
+		return roles;
 	}
 }

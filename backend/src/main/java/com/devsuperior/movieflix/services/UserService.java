@@ -1,7 +1,5 @@
 package com.devsuperior.movieflix.services;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -9,13 +7,18 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.devsuperior.movieflix.dto.RoleDTO;
 import com.devsuperior.movieflix.dto.UserDTO;
+import com.devsuperior.movieflix.entities.Role;
 import com.devsuperior.movieflix.entities.User;
 import com.devsuperior.movieflix.exceptions.DatabaseException;
 import com.devsuperior.movieflix.exceptions.ResourceNotFoundException;
+import com.devsuperior.movieflix.repositories.RoleRepository;
 import com.devsuperior.movieflix.repositories.UserRepository;
 
 @Service
@@ -24,17 +27,14 @@ public class UserService {
 	@Autowired
 	private UserRepository repository;
 	
+	@Autowired
+	private RoleRepository roleRepository;
+	
 	@Transactional(readOnly = true)
-	public List<UserDTO> findAll(){
-		List<User> list = repository.findAll();
+	public Page<UserDTO> findAllPaged(PageRequest pageRequest){
+		Page<User> page = repository.findAll(pageRequest);
 		
-		List<UserDTO> listDTO = new ArrayList<>();
-		
-		for(User user : list) {
-			listDTO.add(new UserDTO(user));
-		}
-		
-		return listDTO;
+		return page.map(x -> new UserDTO(x));
 	}
 
 	@Transactional(readOnly = true)
@@ -48,9 +48,7 @@ public class UserService {
 	@Transactional
 	public UserDTO insert(UserDTO dto) {
 		User entity = new User();
-		entity.setEmail(dto.getEmail());
-		entity.setName(dto.getName());
-		entity.setPassword(dto.getPassword());
+		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		
 		return new UserDTO(entity);
@@ -60,9 +58,7 @@ public class UserService {
 	public UserDTO update(Long id, UserDTO dto) {
 		try {
 			User entity = repository.getOne(id);
-			entity.setEmail(dto.getEmail());
-			entity.setName(dto.getName());
-			entity.setPassword(dto.getPassword());
+			copyDtoToEntity(dto, entity);
 			entity = repository.save(entity);
 			return new UserDTO(entity);
 		}
@@ -82,6 +78,18 @@ public class UserService {
 		catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Integrity violation");
 
+		}
+	}
+	
+	private void copyDtoToEntity(UserDTO dto, User entity) {
+		entity.setName(dto.getName());
+		entity.setEmail(dto.getEmail());
+		entity.setPassword(dto.getPassword());
+		entity.getRoles().clear();
+		
+		for(RoleDTO roleDTO: dto.getRoles()) {
+			Role role = roleRepository.getOne(roleDTO.getId());
+			entity.getRoles().add(role);
 		}
 	}
 }
