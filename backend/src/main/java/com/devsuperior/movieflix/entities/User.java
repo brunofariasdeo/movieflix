@@ -1,15 +1,17 @@
 package com.devsuperior.movieflix.entities;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,21 +26,23 @@ public class User implements Serializable{
 	private String email;
 	private String password;
 	
-	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-	private Instant createdAt;
-
-	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-	private Instant updatedAt;
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "tb_user_role",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "role_id")
+			)
+	private Set<Role>roles = new HashSet<>();
 	
 	public User() {
 		
 	}
 	
-	public User(Long id, String name, String email, String password) {
+	public User(Long id, String name, String email, String password, Set<Role> roles) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		this.roles = roles;
 	}
 
 	public Long getId() {
@@ -73,24 +77,9 @@ public class User implements Serializable{
 		this.password = password;
 	}
 
-	public Instant getCreatedAt() {
-		return createdAt;
+	public Set<Role> getRoles() {
+		return roles;
 	}
-
-	public Instant getUpdatedAt() {
-		return updatedAt;
-	}
-
-	@PrePersist
-	public void prePersist() {
-		createdAt = Instant.now();
-	}
-
-	@PreUpdate
-	public void preUpdate() {
-		updatedAt = Instant.now();
-	}
-	
 
 	@Override
 	public int hashCode() {
