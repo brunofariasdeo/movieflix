@@ -1,7 +1,9 @@
 package com.devsuperior.movieflix.services;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -14,10 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.movieflix.dto.GenreDTO;
+import com.devsuperior.movieflix.dto.MovieDTO;
 import com.devsuperior.movieflix.entities.Genre;
+import com.devsuperior.movieflix.entities.Movie;
 import com.devsuperior.movieflix.exceptions.DatabaseException;
 import com.devsuperior.movieflix.exceptions.ResourceNotFoundException;
 import com.devsuperior.movieflix.repositories.GenreRepository;
+import com.devsuperior.movieflix.repositories.MovieRepository;
 
 @Service
 public class GenreService implements Serializable{
@@ -25,12 +30,22 @@ public class GenreService implements Serializable{
 	
 	@Autowired
 	private GenreRepository repository;
+	
+	@Autowired
+	private MovieRepository movieRepository;
 
 	@Transactional(readOnly = true)
+	public List<GenreDTO> findAll() {
+		List<Genre> list = repository.findAll();
+	
+		return list.stream().map(x -> new GenreDTO(x)).collect(Collectors.toList());
+	}
+	
+	@Transactional(readOnly = true)
 	public Page<GenreDTO> findAllPaged(PageRequest pageRequest){
-		Page<Genre> list = repository.findAll(pageRequest);
+		Page<Genre> page = repository.findAll(pageRequest);
 		
-		return list.map(x -> new GenreDTO(x));
+		return page.map(x -> new GenreDTO(x));
 	}
 	
 	@Transactional(readOnly = true)
@@ -38,13 +53,13 @@ public class GenreService implements Serializable{
 		Optional<Genre> obj = repository.findById(id);
 		Genre entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
 		
-		return new GenreDTO(entity, entity.getMovies());
+		return new GenreDTO(entity);
 	}
 	
 	@Transactional
 	public GenreDTO insert(GenreDTO dto) {
 		Genre entity = new Genre();
-		entity.setName(dto.getName());
+		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		
 		return new GenreDTO(entity);
@@ -54,7 +69,7 @@ public class GenreService implements Serializable{
 	public GenreDTO update(Long id, GenreDTO dto) {
 		try {
 			Genre entity = repository.getOne(id);
-			entity.setName(dto.getName());;
+			copyDtoToEntity(dto, entity);
 			
 			return new GenreDTO(entity);
 		}
@@ -76,5 +91,14 @@ public class GenreService implements Serializable{
 
 		}
 	}
-
+	
+	private void copyDtoToEntity(GenreDTO dto, Genre entity) {
+		entity.setName(dto.getName());
+		entity.getMovies().clear();
+		
+		for(MovieDTO movieDTO: dto.getMovies()) {
+			Movie movie = movieRepository.getOne(movieDTO.getId());
+			entity.getMovies().add(movie);
+		}
+	}
 }
