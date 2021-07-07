@@ -38,6 +38,9 @@ public class ReviewService implements Serializable{
 	@Autowired
 	private UserRepository userRepository;
 	
+	@Autowired
+	private AuthService authService;
+	
 	@Transactional(readOnly = true)
 	public List<ReviewDTO> findAll() {
 		List<Review> reviews = repository.findAll();
@@ -55,14 +58,15 @@ public class ReviewService implements Serializable{
 	
 	@Transactional
 	public ReviewDTO insert(ReviewDTO dto) {
+		User user = authService.authenticated();
+		
+		authService.validateSelfOrMember(user.getId());
+		
 		Review review = new Review();
 		
 		Movie movie = movieRepository.getOne(dto.getMovieId());
 		
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User userAuthenticated = userRepository.findByEmail(authentication.getName());
-		
-		review.setUser(userAuthenticated);
+		review.setUser(user);
 		review.setMovie(movie);
 		review.setText(dto.getText());
 		
@@ -74,7 +78,7 @@ public class ReviewService implements Serializable{
 	@Transactional
 	public ReviewDTO update(Long id, ReviewDTO dto) {
 		try {
-			Review review = new Review();
+			Review review = repository.getOne(id);
 			
 			Movie movie = movieRepository.getOne(dto.getMovieId());
 			
